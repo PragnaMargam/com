@@ -1,0 +1,73 @@
+MODULE main
+VAR
+lift1 : {idle, busy};
+lift2 : {idle, busy};
+user : 0..3;
+request : boolean;
+pick_position : 0..3;
+drop_position : 0..3;
+lift1_position : 0..3;
+lift2_position : 0..3;
+lift1_occupied : boolean;
+lift2_occupied : boolean;
+ASSIGN
+init(lift1) := idle;
+init(lift2) := idle;
+init(user) := 0;
+init(request) := FALSE;
+init(pick_position) := 0;
+init(drop_position) := 0;
+init(lift1_position) := 0;
+init(lift2_position) := 0;
+init(lift1_occupied) := FALSE;
+init(lift2_occupied) := FALSE;
+TRANS
+case
+lift1 = idle & !lift1_occupied & request : next(lift1) = busy;
+lift1 = busy & lift1_occupied & !request : next(lift1) = idle;
+TRUE : next(lift1) = lift1;
+esac;
+TRANS
+case
+lift2 = idle & !lift2_occupied & request : next(lift2) = busy;
+lift2 = busy & lift2_occupied & !request : next(lift2) = idle;
+TRUE : next(lift2) = lift2;
+esac;
+TRANS
+case
+request & !lift1_occupied & !lift2_occupied : next(user) =
+drop_position;
+TRUE : next(user) = user;
+esac;
+TRANS
+case
+request & lift1 = idle & !lift1_occupied : next(lift1_position) =
+pick_position;
+lift1 = busy & lift1_occupied : next(lift1_position) =
+drop_position;
+TRUE : next(lift1_position) = lift1_position;
+esac;
+TRANS
+case
+request & lift2 = idle & !lift2_occupied : next(lift2_position) =
+pick_position;
+lift2 = busy & lift2_occupied : next(lift2_position) =
+drop_position;
+TRUE : next(lift2_position) = lift2_position;
+esac;
+TRANS
+case
+request & lift1 = idle & !lift1_occupied : next(lift1_occupied) =
+TRUE;
+lift1 = busy & lift1_occupied & !request : next(lift1_occupied) =
+FALSE;
+TRUE : next(lift1_occupied) = lift1_occupied;
+esac;
+TRANS
+case
+request & lift2 = idle & !lift2_occupied : next(lift2_occupied) =
+TRUE;
+lift2 = busy & lift2_occupied & !request : next(lift2_occupied) =
+FALSE;
+TRUE : next(lift2_occupied) = lift2_occupied;
+esac;
